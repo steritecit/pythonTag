@@ -30,6 +30,27 @@ import struct
 from scapy.all import *
 import cip
 
+
+def print_bytes_msg(msg, info=''):
+    out = info
+    new_line = True
+    line = 0
+    column = 0
+    for idx, ch in enumerate(msg):
+        print ch
+        if new_line:
+            out += "\n({:0>4d}) ".format(line * 10)
+            new_line = False
+        out += "{:0>2x} ".format(ch)
+        if column == 9:
+            new_line = True
+            column = 0
+            line += 1
+        else:
+            column += 1
+    return out
+
+
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)         # Create a socket
 host = socket.gethostname()  # Get local machine name
 port = 44818                # Reserve a port for your service.
@@ -57,9 +78,11 @@ while bytes_recd < msg_len:
     chunks.append(chunk)
     bytes_recd += len(chunk)
 
-    msg = b''.join(chunks)
-    print msg
+    msg = ''.join(chunks)
 
-print chunks
-print struct.unpack(chunks[0])
+
+print print_bytes_msg(chunks[0])
+
+# print chunks
+# print struct.unpack(chunks[0])
 # print 'Done'
