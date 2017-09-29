@@ -27,8 +27,9 @@
 import socket
 import time
 import struct
-from scapy.all import *
-import cip
+import binascii
+# from scapy.all import *
+# import cip
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)         # Create a socket
 host = socket.gethostname()  # Get local machine name
@@ -45,34 +46,21 @@ bytes_recd = 0
 one_shot = True
 suc = False
 
-while True:
-    while bytes_recd < msg_len:
 
-        chunk = c.recv(min(msg_len - bytes_recd, 2048))
-        print addr
-        if one_shot:
-            data_size = int(struct.unpack('<H', chunk[2:4])[0])  # Length
-            msg_len = 24 + data_size
-            one_shot = False
+while bytes_recd < msg_len:
 
-        chunks.append(chunk)
-        bytes_recd += len(chunk)
+    chunk = c.recv(min(msg_len - bytes_recd, 2048))
+    if one_shot:
+        data_size = int(struct.unpack('<H', chunk[2:4])[0])  # Length
+        msg_len = 24 + data_size
+        one_shot = False
+    chunks.append(chunk)
+    bytes_recd += len(chunk)
 
-        msg = b''.join(chunks)
-        print msg
-        suc = True
-    if suc:
-        p = "\x01" + p[1:]
-            is_response = True
-
-        if is_response:
-            # Add a success status field if there was none
-            if not self.status:
-                p = p[0:1] + b"\0\0\0" + p[1:]
-        return p + pay
-
-    pkt = Ether(chunk)
-    pkt.show()
-
-
-# print 'Done'
+   # msg = b''.join(chunks)
+print ''
+print 'Representation:', repr(chunk)
+hex_data = binascii.hexlify(chunk)  # Two bytes values 0 and 255
+print '      Hex Data:', hex_data
+text_string = hex_data.decode('utf-8')  # Result is string "00ff"
+print '        String:', text_string.decode('hex')
