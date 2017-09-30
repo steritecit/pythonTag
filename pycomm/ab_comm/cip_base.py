@@ -769,10 +769,15 @@ def create_tag_rp(tag, multi_requests=False):
     It returns the request packed wrapped around the tag passed.
     If any error it returns none
     """
+
+
+    el_logger('create_tag_rp', 'tag:', tag)
     tags = tag.encode().split(b'.')
+    el_logger('create_tag_rp', 'tags:', tags)
     rp = []
     index = []
     for tag in tags:
+        el_logger('create_tag_rp', 'tag.forLoop.tag:', tag)
         add_index = False
         # Check if is an array tag
         #if tag.find(b'[') != -1:
@@ -787,18 +792,25 @@ def create_tag_rp(tag, multi_requests=False):
             add_index = True
             # Get only the tag part
             tag = tag[:tag.find(b'[')]
+        el_logger('create_tag_rp', 'tag.forLoop.manipBytesTag:', tag)
         tag_length = len(tag)
-
+        el_logger('create_tag_rp', 'tag.forLoop.tag_length:', tag_length)
         # Create the request path
         rp.append(EXTENDED_SYMBOL)  # ANSI Ext. symbolic segment
+        el_logger('create_tag_rp', 'tag.forLoop.EXTENDED_SYMBOL:', EXTENDED_SYMBOL)
         rp.append(bytes([tag_length]))  # Length of the tag
-
+        el_logger('create_tag_rp', 'tag.forLoop.bytes([tag_length]):', bytes([tag_length]))
         # Add the tag to the Request path
+        el_logger('create_tag_rp', 'tag.forLoop.rp-State:', rp)
         for char in tag:
             rp.append(bytes([char]))
+            el_logger('create_tag_rp', 'tag.forLoop.char():', bytes([char]))
+        el_logger('create_tag_rp', 'tag.forLoop.rp-State after TagName:', rp)
         # Add pad byte because total length of Request path must be word-aligned
         if tag_length % 2:
             rp.append(PADDING_BYTE)
+            el_logger('create_tag_rp', 'tag.forLoop.PADDIN_Byte:', PADDING_BYTE)
+        el_logger('create_tag_rp', 'tag.forLoop.rp-State after padding:', rp)
         # Add any index
         if add_index:
             for idx in index:
@@ -819,8 +831,10 @@ def create_tag_rp(tag, multi_requests=False):
     # At this point the Request Path is completed,
     if multi_requests:
         request_path = bytes([len(rp)//2]) + b''.join(rp)
+        el_logger('create_tag_rp', 'tag.forLoop.PADDIN_Byte:', PADDING_BYTE)
     else:
         request_path = b''.join(rp)
+        el_logger('create_tag_rp', 'tag.forLoop.request_path:', request_path)
     return request_path
 
 
@@ -830,18 +844,28 @@ def build_common_packet_format(message_type, message, addr_type, addr_data=None,
     It creates the common part for a CIP message. Check Volume 2 (page 2.22) of CIP specification  for reference
     """
     msg = pack_dint(0)   # Interface Handle: shall be 0 for CIP
+    el_logger('build_common_packet_format','msg',msg)
     msg += pack_uint(timeout)   # timeout
+    el_logger('build_common_packet_format','pack_uint(timeout)',pack_uint(timeout) )
     msg += pack_uint(2)  # Item count: should be at list 2 (Address and Data)
+    el_logger('build_common_packet_format','pack_uint(2)',pack_uint(2))
     msg += addr_type  # Address Item Type ID
+    el_logger('build_common_packet_format','addr_type',addr_type)
 
     if addr_data is not None:
         msg += pack_uint(len(addr_data))  # Address Item Length
+        el_logger('build_common_packet_format','pack_uint(len(addr_data))',pack_uint(len(addr_data)))
         msg += addr_data
+        el_logger('build_common_packet_format','addr_data',addr_data)
     else:
         msg += pack_uint(0)  # Address Item Length
+        el_logger('build_common_packet_format','pack_uint(0)',pack_uint(0))
     msg += message_type  # Data Type ID
+    el_logger('build_common_packet_format','message_type',message_type)
     msg += pack_uint(len(message))   # Data Item Length
+    el_logger('build_common_packet_format','pack_uint(len(message))',pack_uint(len(message)))
     msg += message
+    el_logger('build_common_packet_format','message',message)
     return msg
 
 
@@ -1063,7 +1087,7 @@ class Base(object):
             Base._sequence += 1
         else:
             Base._sequence = getpid() % 65535
-        el_logger('base',' _get_sequence()','Sequence:',Base._sequence)
+        el_logger('base. _get_sequence()','Sequence:',Base._sequence)
         return Base._sequence
 
     def nop(self):
