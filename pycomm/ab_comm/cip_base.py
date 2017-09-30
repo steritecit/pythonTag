@@ -804,6 +804,7 @@ def create_tag_rp(tag, multi_requests=False):
         el_logger('create_tag_rp', 'tag.forLoop.rp-State:', rp)
         for char in tag:
             rp.append(bytes([char]))
+            el_logger('create_tag_rp', 'tag.forLoop.char():', repr(bytes([char])))
             el_logger('create_tag_rp', 'tag.forLoop.char():', bytes([char]))
         el_logger('create_tag_rp', 'tag.forLoop.rp-State after TagName:', rp)
         # Add pad byte because total length of Request path must be word-aligned
@@ -1342,12 +1343,12 @@ class Base(object):
         socket send
         :return: true if no error otherwise false
         """
-        try:
-            logger.debug(print_bytes_msg(self._message, '-------------- SEND --------------'))
-            self.__sock.send(self._message)
-        except Exception as e:
-            # self.clean_up()
-            raise CommError(e)
+        # try:
+        logger.debug(print_bytes_msg(self._message, '-------------- SEND --------------'))
+        self.__sock.send(self._message)
+        # except Exception as e:
+        #     # self.clean_up()
+        #     raise CommError(e)
 
     def _receive(self):
         """
@@ -1356,6 +1357,8 @@ class Base(object):
         """
         try:
             self._reply = self.__sock.receive()
+            print('Reply if any!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',
+            self._reply)
             logger.debug(print_bytes_msg(self._reply, '----------- RECEIVE -----------'))
         except Exception as e:
             # self.clean_up()
@@ -1372,7 +1375,7 @@ class Base(object):
 
         # handle the socket layer
         if not self._connection_opened:
-            try:
+            # try:
                 if self.__sock is None:
                     self.__sock = Socket()
                 self.__sock.connect(ip_address, self.attribs['port'])
@@ -1387,9 +1390,9 @@ class Base(object):
                 # not sure but maybe I can remove this because is used to clean up any previous unclosed connection
                 self.forward_close()
                 return True
-            except Exception as e:
-                # self.clean_up()
-                raise CommError(e)
+            # except Exception as e:
+            #     # self.clean_up()
+            #     raise CommError(e)
 
     def close(self):
         """

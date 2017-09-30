@@ -399,19 +399,20 @@ class Driver(Base):
                 message_request = [
                     pack_uint(Base._get_sequence()),
                     # the Request Service
-                    pack_dint((TAG_SERVICES_REQUEST['Read Tag'])),
+                    chr(TAG_SERVICES_REQUEST['Read Tag']).encode('utf-8'),
                     # the Request Path Size length in word
                     pack_uint(int(len(rp) / 2)),
                     rp,                                     # the request path
-                    pack_uint(1)]
+                    pack_uint(1)
+                    ]
 
 
-                #el_logger('read_tag.Base','_get_sequence()',Base._get_sequence())
-                #el_logger('read_tag.pack_uint','pack_uint(Base._get_sequence())',pack_uint(Base._get_sequence()))
-                #el_logger('read_tag','TAG_SERVICES_REQUEST[Read Tag] chr()',chr(TAG_SERVICES_REQUEST['Read Tag']))
-                #el_logger('read_tag','chr(int(len(rp) / 2)) len(rp) = %s, len(rp) / 2 = %s, chr = %s' % (len(rp),int(len(rp)/2),chr(int(len(rp)/2))) , chr(int(len(rp) / 2)))
-                #el_logger('read_tag', 'create_tag_rp(tag)', rp )
-                #el_logger('read_tag', 'pack_uint(1)', pack_uint(1))
+                el_logger('read_tag.Base','_get_sequence()',Base._get_sequence())
+                el_logger('read_tag.pack_uint','pack_uint(Base._get_sequence())',pack_uint(Base._get_sequence()))
+                el_logger('read_tag','TAG_SERVICES_REQUEST[Read Tag] chr()',chr(TAG_SERVICES_REQUEST['Read Tag']))
+                el_logger('read_tag','chr(int(len(rp) / 2)) len(rp) = %s, len(rp) / 2 = %s, chr = %s' % (len(rp),int(len(rp)/2),chr(int(len(rp)/2))) , chr(int(len(rp) / 2)))
+                el_logger('read_tag', 'create_tag_rp(tag)', rp )
+                el_logger('read_tag', 'pack_uint(1)', pack_uint(1))
 
 
         
@@ -426,11 +427,11 @@ class Driver(Base):
                 )) is None:
             
             
-            el_logger('read_tag','DATA_ITEM[Connected]',DATA_ITEM['Connected'])
-            el_logger('read_tag', 'message_request',
-                    message_request)
-            el_logger('read_tag','ADDRESS_ITEM[Connection Based]',pack_uint(Base._get_sequence()))
-            el_logger('read_tag','addr_data',self._target_cid)
+            # el_logger('read_tag','DATA_ITEM[Connected]',DATA_ITEM['Connected'])
+            # el_logger('read_tag', 'message_request',
+            #         message_request)
+            # el_logger('read_tag','ADDRESS_ITEM[Connection Based]',pack_uint(Base._get_sequence()))
+            # el_logger('read_tag','addr_data',self._target_cid)
             # el_logger('read_tag','chr(int(len(rp) / 2)) len(rp) = %s, len(rp) / 2 = %s, chr = %s' % (len(rp),int(len(rp)/2),chr(int(len(rp)/2))) , chr(int(len(rp) / 2)))
             # el_logger('read_tag', 'create_tag_rp(tag)', rp )
             # el_logger('read_tag', 'pack_uint(1)', pack_uint(1))
@@ -447,6 +448,7 @@ class Driver(Base):
             # Get the data type
             if self._status[0] == SUCCESS:
                 data_type = unpack_uint(self._reply[50:52])
+                print('sdfsdfsdfsdfsdfsdffffffffffffffffffffffffffffffffffffffffffffffff',data_type)
                 try:
                     return UNPACK_DATA_FUNCTION[I_DATA_TYPE[data_type]](self._reply[52:]), I_DATA_TYPE[data_type]
                 except Exception as e:
