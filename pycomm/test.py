@@ -1,4 +1,4 @@
-from pycomm.ab_comm.clx import Driver as ClxDriver
+from ab_comm.clx import Driver as ClxDriver
 import logging
 import time
 

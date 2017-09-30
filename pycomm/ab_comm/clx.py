@@ -23,7 +23,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-from pycomm.cip.cip_base import *
+import binascii
+from .cip_base import *
 import logging
 try:  # Python 2.7+
     from logging import NullHandler
@@ -360,8 +361,11 @@ class Driver(Base):
         multi_requests = False
         if isinstance(tag, list):
             multi_requests = True
-
+        el_logger('read_tag', '_target_is_connected',
+                  self._target_is_connected)
         if not self._target_is_connected:
+            el_logger('read_tag', '_target_is_connected',
+                      self._target_is_connected)
             if not self.forward_open():
                 self._status = (
                     6, "Target did not connected. read_tag will not be executed.")
@@ -397,11 +401,21 @@ class Driver(Base):
                     # the Request Service
                     chr(TAG_SERVICES_REQUEST['Read Tag']),
                     # the Request Path Size length in word
-                    chr(len(rp) / 2),
+                    chr(int(len(rp) / 2)),
                     rp,                                     # the request path
-                    pack_uint(1)
-                ]
+                    pack_uint(1)]
 
+
+                el_logger('read_tag.Base','_get_sequence()',Base._get_sequence())
+                el_logger('read_tag.pack_uint','pack_uint(Base._get_sequence())',pack_uint(Base._get_sequence()))
+                el_logger('read_tag','TAG_SERVICES_REQUEST[Read Tag] chr()',chr(TAG_SERVICES_REQUEST['Read Tag']))
+                el_logger('read_tag','chr(int(len(rp) / 2)) len(rp) = %s, len(rp) / 2 = %s, chr = %s' % (len(rp),int(len(rp)/2),chr(int(len(rp)/2))) , chr(int(len(rp) / 2)))
+                el_logger('read_tag', 'create_tag_rp(tag)', rp )
+                el_logger('read_tag', 'pack_uint(1)', pack_uint(1))
+
+
+        el_logger('read_tag', 'message_request',
+                  message_request)
         if self.send_unit_data(
                 build_common_packet_format(
                     DATA_ITEM['Connected'],
