@@ -1,7 +1,6 @@
 from ab_comm.clx import Driver as ClxDriver
 import logging
 import time
-
 if __name__ == '__main__':
     logging.basicConfig(
         filename="ClxDriver.log",

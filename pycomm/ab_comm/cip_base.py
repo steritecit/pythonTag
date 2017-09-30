@@ -30,8 +30,7 @@ import random
 from pprint import pprint
 from os import getpid, urandom
 import time
-
-LOGGING_ON = True
+from logger import log
 
 import logging
 try:  # Python 2.7+
@@ -527,54 +526,46 @@ PCCC_ERROR_CODE = {
     240: "Error code in EXT STS Byte"
 }
 
+
+
 class PycommError(Exception):
     pass
+
 
 class CommError(PycommError):
     pass
 
 
+
 class DataError(PycommError):
     pass
 
+@log
 def build_padding(valueSize):
     return ' '*(50-valueSize)
 
+
+@log
 def format_print_log(funcname, methodname, title, value):
     print(build_padding(len(title)), title, value)
 
-def log(func):
-    def wrapper(*args, **kwargs):
-        if LOGGING_ON:
-            print('\nFUNCTION: ', func.__name__)
-            print('---------------')
-            for arg in args:
-                print(' -- Argument:', arg, ' TYPE:', type(arg))
-            for key, val in kwargs.items():
-                print(' -- KW Argument:', key, val, ' TYPE:', type(val))
-            value = func(*args, **kwargs)
-            print('   ------  Return Value: ', value, ' TYPE:', type(value))
-            time.sleep(2)
 
-        return func(*args, **kwargs)
-    return wrapper
-
-def el_logger(funcname, methodname, value):
-    print('*'*50, '[ ','Function:', funcname, '()', ' ]', '*'*50)
-    print('Var || Method:', methodname)
-    format_print_log(funcname, methodname, 'Representation:', repr(value))
-    try:
-        hex_data = hexlify(value)
-        text_string = hex_data.decode('utf-8')
-        format_print_log(funcname, methodname, 'Hex Data:', hex_data) # Two bytes values 0 and 255
-        format_print_log(funcname, methodname, 'String:', text_string)
+# def el_logger(funcname, methodname, value):
+#     print('*'*50, '[ ','Function:', funcname, '()', ' ]', '*'*50)
+#     print('Var || Method:', methodname)
+#     format_print_log(funcname, methodname, 'Representation:', repr(value))
+#     try:
+#         hex_data = hexlify(value)
+#         text_string = hex_data.decode('utf-8')
+#         format_print_log(funcname, methodname, 'Hex Data:', hex_data) # Two bytes values 0 and 255
+#         format_print_log(funcname, methodname, 'String:', text_string)
         
         
-    except:
-        msg = 'Source: el_logger(): Error: Datatype mismatch for hexConversion. Type Passed: %s' % type(value)
-        format_print_log(funcname, methodname, 'Raw', msg)
-    print("")
-    print("")
+#     except:
+#         msg = 'Source: el_logger(): Error: Datatype mismatch for hexConversion. Type Passed: %s' % type(value)
+#         format_print_log(funcname, methodname, 'Raw', msg)
+#     print("")
+#     print("")
 
 @log
 def pack_sint(n):
@@ -809,13 +800,13 @@ def create_tag_rp(tag, multi_requests=False):
     """
 
 
-    el_logger('create_tag_rp', 'tag:', tag)
+    # el_logger('create_tag_rp', 'tag:', tag)
     tags = tag.encode().split(b'.')
-    el_logger('create_tag_rp', 'tags:', tags)
+    # el_logger('create_tag_rp', 'tags:', tags)
     rp = []
     index = []
     for tag in tags:
-        el_logger('create_tag_rp', 'tag.forLoop.tag:', tag)
+        # el_logger('create_tag_rp', 'tag.forLoop.tag:', tag)
         add_index = False
         # Check if is an array tag
         #if tag.find(b'[') != -1:
@@ -830,25 +821,25 @@ def create_tag_rp(tag, multi_requests=False):
             add_index = True
             # Get only the tag part
             tag = tag[:tag.find(b'[')]
-        el_logger('create_tag_rp', 'tag.forLoop.manipBytesTag:', tag)
+        # el_logger('create_tag_rp', 'tag.forLoop.manipBytesTag:', tag)
         tag_length = len(tag)
-        el_logger('create_tag_rp', 'tag.forLoop.tag_length:', tag_length)
+        # el_logger('create_tag_rp', 'tag.forLoop.tag_length:', tag_length)
         # Create the request path
         rp.append(EXTENDED_SYMBOL)  # ANSI Ext. symbolic segment
-        el_logger('create_tag_rp', 'tag.forLoop.EXTENDED_SYMBOL:', EXTENDED_SYMBOL)
+        # el_logger('create_tag_rp', 'tag.forLoop.EXTENDED_SYMBOL:', EXTENDED_SYMBOL)
         rp.append(bytes([tag_length]))  # Length of the tag
-        el_logger('create_tag_rp', 'tag.forLoop.bytes([tag_length]):', bytes([tag_length]))
+        # el_logger('create_tag_rp', 'tag.forLoop.bytes([tag_length]):', bytes([tag_length]))
         # Add the tag to the Request path
-        el_logger('create_tag_rp', 'tag.forLoop.rp-State:', rp)
+        # el_logger('create_tag_rp', 'tag.forLoop.rp-State:', rp)
         for char in tag:
             rp.append(bytes([char]))
-            el_logger('create_tag_rp', 'tag.forLoop.char():', bytes([char]))
-        el_logger('create_tag_rp', 'tag.forLoop.rp-State after TagName:', rp)
+            # el_logger('create_tag_rp', 'tag.forLoop.char():', bytes([char]))
+        # el_logger('create_tag_rp', 'tag.forLoop.rp-State after TagName:', rp)
         # Add pad byte because total length of Request path must be word-aligned
         if tag_length % 2:
             rp.append(PADDING_BYTE)
-            el_logger('create_tag_rp', 'tag.forLoop.PADDIN_Byte:', PADDING_BYTE)
-        el_logger('create_tag_rp', 'tag.forLoop.rp-State after padding:', rp)
+            # el_logger('create_tag_rp', 'tag.forLoop.PADDIN_Byte:', PADDING_BYTE)
+        # el_logger('create_tag_rp', 'tag.forLoop.rp-State after padding:', rp)
         # Add any index
         if add_index:
             for idx in index:
@@ -869,10 +860,10 @@ def create_tag_rp(tag, multi_requests=False):
     # At this point the Request Path is completed,
     if multi_requests:
         request_path = bytes([len(rp)//2]) + b''.join(rp)
-        el_logger('create_tag_rp', 'tag.forLoop.PADDIN_Byte:', PADDING_BYTE)
+        # el_logger('create_tag_rp', 'tag.forLoop.PADDIN_Byte:', PADDING_BYTE)
     else:
         request_path = b''.join(rp)
-        el_logger('create_tag_rp', 'tag.forLoop.request_path:', request_path)
+        # el_logger('create_tag_rp', 'tag.forLoop.request_path:', request_path)
     return request_path
 
 
@@ -884,28 +875,28 @@ def build_common_packet_format(message_type, message, addr_type, addr_data=None,
     """
 
     msg = pack_dint(0)   # Interface Handle: shall be 0 for CIP
-    el_logger('build_common_packet_format','msg',msg)
+    # el_logger('build_common_packet_format','msg',msg)
     msg += pack_uint(timeout)   # timeout
-    el_logger('build_common_packet_format','pack_uint(timeout)',pack_uint(timeout) )
+    # el_logger('build_common_packet_format','pack_uint(timeout)',pack_uint(timeout) )
     msg += pack_uint(2)  # Item count: should be at list 2 (Address and Data)
-    el_logger('build_common_packet_format','pack_uint(2)',pack_uint(2))
+    # el_logger('build_common_packet_format','pack_uint(2)',pack_uint(2))
     msg += addr_type  # Address Item Type ID
-    el_logger('build_common_packet_format','addr_type',addr_type)
+    # el_logger('build_common_packet_format','addr_type',addr_type)
 
     if addr_data is not None:
         msg += pack_uint(len(addr_data))  # Address Item Length
-        el_logger('build_common_packet_format','pack_uint(len(addr_data))',pack_uint(len(addr_data)))
+        # el_logger('build_common_packet_format','pack_uint(len(addr_data))',pack_uint(len(addr_data)))
         msg += addr_data
-        el_logger('build_common_packet_format','addr_data',addr_data)
+        # el_logger('build_common_packet_format','addr_data',addr_data)
     else:
         msg += pack_uint(0)  # Address Item Length
-        el_logger('build_common_packet_format','pack_uint(0)',pack_uint(0))
+        # el_logger('build_common_packet_format','pack_uint(0)',pack_uint(0))
     msg += message_type  # Data Type ID
-    el_logger('build_common_packet_format','message_type',message_type)
+    # el_logger('build_common_packet_format','message_type',message_type)
     msg += pack_uint(len(message))   # Data Item Length
-    el_logger('build_common_packet_format','pack_uint(len(message))',pack_uint(len(message)))
+    # el_logger('build_common_packet_format','pack_uint(len(message))',pack_uint(len(message)))
     msg += message
-    el_logger('build_common_packet_format','message',message)
+    # el_logger('build_common_packet_format','message',message)
     return msg
 
 
@@ -982,6 +973,7 @@ def parse_multiple_request(message, tags, typ):
     return tag_list
 
 
+
 class Socket:
 
     def __init__(self, timeout=5.0):
@@ -989,12 +981,16 @@ class Socket:
         self.sock.settimeout(timeout)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
 
+
+    @log
     def connect(self, host, port):
         try:
             self.sock.connect((host, port))
         except socket.timeout:
             raise CommError("Socket timeout during connection.")
 
+
+    @log
     def send(self, msg, timeout=0):
         if timeout != 0:
             self.sock.settimeout(timeout)
@@ -1009,6 +1005,8 @@ class Socket:
                 raise CommError("socket connection broken.")
         return total_sent
 
+
+    @log
     def receive(self, timeout=0):
         if timeout != 0:
             self.sock.settimeout(timeout)
@@ -1032,10 +1030,13 @@ class Socket:
                 raise CommError(e)
         return b''.join(chunks)
 
+
+    @log
     def close(self):
         self.sock.close()
 
 
+@log
 def parse_symbol_type(symbol):
     """ parse_symbol_type
 
@@ -1046,6 +1047,7 @@ def parse_symbol_type(symbol):
     pass
 
     return None
+
 
 
 class Base(object):
@@ -1095,11 +1097,15 @@ class Base(object):
                 'name':             'Base',
                 'ip address':       None}
 
+
+
     def __len__(self):
         return len(self.attribs)
 
+
     def __getitem__(self, key):
         return self.attribs[key]
+
 
     def __setitem__(self, key, value):
         self.attribs[key] = value
@@ -1129,7 +1135,7 @@ class Base(object):
             Base._sequence += 1
         else:
             Base._sequence = getpid() % 65535
-        el_logger('base. _get_sequence()','Sequence:',Base._sequence)
+        # el_logger('base. _get_sequence()','Sequence:',Base._sequence)
         return Base._sequence
 
     def nop(self):
@@ -1140,22 +1146,28 @@ class Base(object):
         self._message = self.build_header(ENCAPSULATION_COMMAND['nop'], 0)
         self._send()
 
+
     def __repr__(self):
         return self._device_description
 
+
+    @log
     def generate_cid(self):
         #self.attribs['cid'] = '{0}{1}{2}{3}'.format(chr(random.randint(0, 255)), chr(random.randint(0, 255))
         #                                            , chr(random.randint(0, 255)), chr(random.randint(0, 255)))
         self.attribs['cid'] = urandom(4)
 
+    @log
     def generate_vsn(self):
         #self.attribs['vsn'] = '{0}{1}{2}{3}'.format(chr(random.randint(0, 255)), chr(random.randint(0, 255))
         #                                            , chr(random.randint(0, 255)), chr(random.randint(0, 255)))
         self.attribs['vsn'] = urandom(4)
 
+    @log
     def description(self):
         return self._device_description
 
+    @log
     def list_identity(self):
         """ ListIdentity command to locate and identify potential target
 
@@ -1171,7 +1183,8 @@ class Base(object):
             except Exception as e:
                 raise CommError(e)
         return False
-
+    
+    @log
     def send_rr_data(self, msg):
         """ SendRRData transfer an encapsulated request/reply packet between the originator and target
 
@@ -1184,6 +1197,7 @@ class Base(object):
         self._receive()
         return self._check_reply()
 
+    @log
     def send_unit_data(self, msg):
         """ SendUnitData send encapsulated connected messages.
 
@@ -1196,6 +1210,7 @@ class Base(object):
         self._receive()
         return self._check_reply()
 
+    @log
     def get_status(self):
         """ Get the last status/error
 
@@ -1204,6 +1219,7 @@ class Base(object):
         """
         return self._status
 
+    @log
     def clear(self):
         """ Clear the last status/error
 
@@ -1211,6 +1227,7 @@ class Base(object):
         """
         self._status = (0, "")
 
+    @log
     def build_header(self, command, length):
         """ Build the encapsulate message header
 
@@ -1229,6 +1246,8 @@ class Base(object):
         except Exception as e:
             raise CommError(e)
 
+
+    @log
     def register_session(self):
         """ Register a new session with the communication partner
 
@@ -1252,6 +1271,8 @@ class Base(object):
         logger.warning(self._status)
         return None
 
+
+    @log
     def forward_open(self):
         """ CIP implementation of the forward open message
 
@@ -1293,8 +1314,8 @@ class Base(object):
             INSTANCE_ID["8-bit"],
             pack_usint(1)
         ]
-        el_logger('forward_open', 'forward_open_msg',
-                  forward_open_msg)
+        # el_logger('forward_open', 'forward_open_msg',
+        #           forward_open_msg)
 
         if self.__direct_connections:
             forward_open_msg[20:1] = [
@@ -1315,6 +1336,7 @@ class Base(object):
         self._status = (4, "forward_open returned False")
         return False
 
+    @log
     def forward_close(self):
         """ CIP implementation of the forward close message
 
@@ -1371,6 +1393,8 @@ class Base(object):
         logger.warning(self._status)
         return False
 
+
+    @log
     def un_register_session(self):
         """ Un-register a connection
 
@@ -1379,6 +1403,8 @@ class Base(object):
         self._send()
         self._session = None
 
+
+    @log
     def _send(self):
         """
         socket send
@@ -1391,6 +1417,7 @@ class Base(object):
             # self.clean_up()
             raise CommError(e)
 
+    @log
     def _receive(self):
         """
         socket receive
@@ -1403,6 +1430,7 @@ class Base(object):
             # self.clean_up()
             raise CommError(e)
 
+    @log
     def open(self, ip_address, direct_connection=False):
         """
         socket open
@@ -1433,6 +1461,7 @@ class Base(object):
                 # self.clean_up()
                 raise CommError(e)
 
+    @log
     def close(self):
         """
         socket close
@@ -1476,12 +1505,13 @@ class Base(object):
 
 
 
-
+    @log
     def clean_up(self):
         self.__sock = None
         self._target_is_connected = False
         self._session = 0
         self._connection_opened = False
 
+    @log
     def is_connected(self):
         return self._connection_opened

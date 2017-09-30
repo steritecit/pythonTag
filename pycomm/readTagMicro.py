@@ -1,7 +1,11 @@
+from logger import log
+
+
 class DataError(PycommError):
     pass
 
 
+@log
 def forward_open(self):
     """ CIP implementation of the forward open message
 
@@ -65,6 +69,7 @@ def forward_open(self):
     return False
 
 
+@log
 def read_tag(self, tag):
     """ read tag from a connected plc
 
