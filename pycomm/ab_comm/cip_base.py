@@ -29,7 +29,9 @@ import socket
 import random
 from pprint import pprint
 from os import getpid, urandom
+import time
 
+LOGGING_ON = True
 
 import logging
 try:  # Python 2.7+
@@ -541,6 +543,22 @@ def build_padding(valueSize):
 def format_print_log(funcname, methodname, title, value):
     print(build_padding(len(title)), title, value)
 
+def log(func):
+    def wrapper(*args, **kwargs):
+        if LOGGING_ON:
+            print('\nFUNCTION: ', func.__name__)
+            print('---------------')
+            for arg in args:
+                print(' -- Argument:', arg, ' TYPE:', type(arg))
+            for key, val in kwargs.items():
+                print(' -- KW Argument:', key, val, ' TYPE:', type(val))
+            value = func(*args, **kwargs)
+            print('   ------  Return Value: ', value, ' TYPE:', type(value))
+            time.sleep(2)
+
+        return func(*args, **kwargs)
+    return wrapper
+
 def el_logger(funcname, methodname, value):
     print('*'*50, '[ ','Function:', funcname, '()', ' ]', '*'*50)
     print('Var || Method:', methodname)
@@ -558,78 +576,93 @@ def el_logger(funcname, methodname, value):
     print("")
     print("")
 
+@log
 def pack_sint(n):
     return struct.pack('b', n)
 
 
+@log
 def pack_usint(n):
     return struct.pack('B', n)
 
 
+@log
 def pack_int(n):
     """pack 16 bit into 2 bytes little endian"""
     return struct.pack('<h', n)
 
 
+@log
 def pack_uint(n):
     """pack 16 bit into 2 bytes little endian"""
     return struct.pack('<H', n)
 
 
+@log
 def pack_dint(n):
     """pack 32 bit into 4 bytes little endian"""
     return struct.pack('<i', n)
 
 
+@log
 def pack_real(r):
     """unpack 4 bytes little endian to int"""
     return struct.pack('<f', r)
 
 
+@log
 def pack_lint(l):
     """unpack 4 bytes little endian to int"""
     return struct.pack('<q', l)
 
 
+@log
 def unpack_bool(st):
     if not (int(struct.unpack('B', st[0])[0]) == 0):
         return 1
     return 0
 
 
+@log
 def unpack_sint(st):
     return int(struct.unpack('b', st[0])[0])
 
 
+@log
 def unpack_usint(st):
     return int(struct.unpack('B', bytes([st[0]]))[0])
 
 
+@log
 def unpack_int(st):
     """unpack 2 bytes little endian to int"""
     return int(struct.unpack('<h', st[0:2])[0])
 
-
+@log
 def unpack_uint(st):
     """unpack 2 bytes little endian to int"""
     return int(struct.unpack('<H', st[0:2])[0])
 
 
+@log
 def unpack_dint(st):
     """unpack 4 bytes little endian to int"""
     return int(struct.unpack('<i', st[0:4])[0])
 
 
+@log
 def unpack_real(st):
     """unpack 4 bytes little endian to int"""
     return float(struct.unpack('<f', st[0:4])[0])
 
 
+@log
 def unpack_lint(st):
     """unpack 4 bytes little endian to int"""
     return int(struct.unpack('<q', st[0:8])[0])
 
 
+@log
 def get_bit(value, idx):
     """:returns value of bit at position idx"""
     return (value & (1 << idx)) != 0
@@ -708,6 +741,8 @@ PACK_PCCC_DATA_FUNCTION = {
     'I': pack_int
 }
 
+
+@log
 def print_bytes_line(msg):
     out = ''
     for ch in msg:
@@ -715,6 +750,7 @@ def print_bytes_line(msg):
     return out
 
 
+@log
 def print_bytes_msg(msg, info=''):
     out = info
     new_line = True
@@ -734,6 +770,7 @@ def print_bytes_msg(msg, info=''):
     return out
 
 
+@log
 def get_extended_status(msg, start):
     status = unpack_usint(msg[start:start+1])
     # send_rr_data
@@ -763,6 +800,7 @@ def get_extended_status(msg, start):
         return "Extended Status info not present"
 
 
+@log
 def create_tag_rp(tag, multi_requests=False):
     """ Create tag Request Packet
 
@@ -838,11 +876,13 @@ def create_tag_rp(tag, multi_requests=False):
     return request_path
 
 
+@log
 def build_common_packet_format(message_type, message, addr_type, addr_data=None, timeout=10):
     """ build_common_packet_format
 
     It creates the common part for a CIP message. Check Volume 2 (page 2.22) of CIP specification  for reference
     """
+
     msg = pack_dint(0)   # Interface Handle: shall be 0 for CIP
     el_logger('build_common_packet_format','msg',msg)
     msg += pack_uint(timeout)   # timeout
@@ -869,12 +909,13 @@ def build_common_packet_format(message_type, message, addr_type, addr_data=None,
     return msg
 
 
+@log
 def build_multiple_service(rp_list, sequence=None):
 
     mr = []
     if sequence is not None:
         mr.append(pack_uint(sequence))
-
+    print('SEQUENCE', sequence)
     mr.append(bytes([TAG_SERVICES_REQUEST["Multiple Service Packet"]]))  # the Request Service
     mr.append(pack_usint(2))                 # the Request Path Size length in word
     mr.append(CLASS_ID["8-bit"])
@@ -897,6 +938,7 @@ def build_multiple_service(rp_list, sequence=None):
     return mr
 
 
+@log
 def parse_multiple_request(message, tags, typ):
     """ parse_multi_request
     This function should be used to parse the message replayed to a multi request service rapped around the
