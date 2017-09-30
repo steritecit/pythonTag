@@ -31,7 +31,7 @@ from pprint import pprint
 from os import getpid, urandom
 import time
 
-LOGGING_ON = True
+LOGGING_ON = False
 
 import logging
 try:  # Python 2.7+

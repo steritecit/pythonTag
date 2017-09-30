@@ -13,8 +13,7 @@ if __name__ == '__main__':
     if c.open('192.168.6.70'):
         print('Something here')
         # print(c.read_tag('Raymond_DINT'))
-        val = c.read_tag('Raymond_INT')
-        c.write_tag(bytes(val))
+        c.read_tag('Raymond_INT')
         # print(c.read_tag('Raymond_Real'))
         # print(c.read_tag('Raymond_SINT'))
         # print(c.read_tag('Scan_Counter'))
