@@ -361,42 +361,42 @@ class Driver(Base):
         multi_requests = False
         if isinstance(tag, list):
             multi_requests = True
-        el_logger('read_tag', '_target_is_connected',
-                  self._target_is_connected)
+        # el_logger('read_tag', '_target_is_connected',
+                # self._target_is_connected)
         if not self._target_is_connected:
-            el_logger('read_tag', '_target_is_connected',
-                      self._target_is_connected)
+            # el_logger('read_tag', '_target_is_connected',
+                    #   self._target_is_connected)
             if not self.forward_open():
-                self._status = (
+                self._status=(
                     6, "Target did not connected. read_tag will not be executed.")
                 logger.warning(self._status)
                 raise DataError(
                     "Target did not connected. read_tag will not be executed.")
 
         if multi_requests:
-            rp_list = []
+            rp_list=[]
             for t in tag:
-                rp = create_tag_rp(t, multi_requests=True)
+                rp=create_tag_rp(t, multi_requests=True)
                 if rp is None:
-                    self._status = (
+                    self._status=(
                         6, "Cannot create tag {0} request packet. read_tag will not be executed.".format(tag))
                     raise DataError(
                         "Cannot create tag {0} request packet. read_tag will not be executed.".format(tag))
                 else:
                     rp_list.append(
                         chr(TAG_SERVICES_REQUEST['Read Tag']) + rp + pack_uint(1))
-            message_request = build_multiple_service(
+            message_request=build_multiple_service(
                 rp_list, Base._get_sequence())
 
         else:
-            rp = create_tag_rp(tag)
+            rp=create_tag_rp(tag)
             if rp is None:
-                self._status = (
+                self._status=(
                     6, "Cannot create tag {0} request packet. read_tag will not be executed.".format(tag))
                 return None
             else:
                 # Creating the Message Request Packet
-                message_request = [
+                message_request=[
                     pack_uint(Base._get_sequence()),
                     # the Request Service
                     chr(TAG_SERVICES_REQUEST['Read Tag']).encode('utf-8'),
@@ -407,26 +407,26 @@ class Driver(Base):
                     ]
 
 
-                el_logger('read_tag.Base','_get_sequence()',Base._get_sequence())
-                el_logger('read_tag.pack_uint','pack_uint(Base._get_sequence())',pack_uint(Base._get_sequence()))
-                el_logger('read_tag','TAG_SERVICES_REQUEST[Read Tag] chr()',chr(TAG_SERVICES_REQUEST['Read Tag']))
-                el_logger('read_tag','chr(int(len(rp) / 2)) len(rp) = %s, len(rp) / 2 = %s, chr = %s' % (len(rp),int(len(rp)/2),chr(int(len(rp)/2))) , chr(int(len(rp) / 2)))
-                el_logger('read_tag', 'create_tag_rp(tag)', rp )
-                el_logger('read_tag', 'pack_uint(1)', pack_uint(1))
+                # el_logger('read_tag.Base','_get_sequence()',Base._get_sequence())
+                # el_logger('read_tag.pack_uint','pack_uint(Base._get_sequence())',pack_uint(Base._get_sequence()))
+                # el_logger('read_tag','TAG_SERVICES_REQUEST[Read Tag] chr()',chr(TAG_SERVICES_REQUEST['Read Tag']))
+                # el_logger('read_tag','chr(int(len(rp) / 2)) len(rp) = %s, len(rp) / 2 = %s, chr = %s' % (len(rp),int(len(rp)/2),chr(int(len(rp)/2))) , chr(int(len(rp) / 2)))
+                # el_logger('read_tag', 'create_tag_rp(tag)', rp )
+                # el_logger('read_tag', 'pack_uint(1)', pack_uint(1))
 
 
-        
-        
-        
+
+
+
         if self.send_unit_data(
                 build_common_packet_format(
                     DATA_ITEM['Connected'],
                     b''.join(message_request),
                     ADDRESS_ITEM['Connection Based'],
-                    addr_data=self._target_cid,
+                    addr_data = self._target_cid,
                 )) is None:
-            
-            
+
+
             # el_logger('read_tag','DATA_ITEM[Connected]',DATA_ITEM['Connected'])
             # el_logger('read_tag', 'message_request',
             #         message_request)
@@ -435,11 +435,11 @@ class Driver(Base):
             # el_logger('read_tag','chr(int(len(rp) / 2)) len(rp) = %s, len(rp) / 2 = %s, chr = %s' % (len(rp),int(len(rp)/2),chr(int(len(rp)/2))) , chr(int(len(rp) / 2)))
             # el_logger('read_tag', 'create_tag_rp(tag)', rp )
             # el_logger('read_tag', 'pack_uint(1)', pack_uint(1))
-            
-            
-            
-            
-            
+
+
+
+
+
             raise DataError("send_unit_data returned not valid data")
 
         if multi_requests:
@@ -447,8 +447,7 @@ class Driver(Base):
         else:
             # Get the data type
             if self._status[0] == SUCCESS:
-                data_type = unpack_uint(self._reply[50:52])
-                print('sdfsdfsdfsdfsdfsdffffffffffffffffffffffffffffffffffffffffffffffff',data_type)
+                data_type=unpack_uint(self._reply[50:52])
                 try:
                     return UNPACK_DATA_FUNCTION[I_DATA_TYPE[data_type]](self._reply[52:]), I_DATA_TYPE[data_type]
                 except Exception as e:
@@ -457,12 +456,12 @@ class Driver(Base):
                 return None
 
     def read_string(self, tag):
-        data_tag = ".".join((tag, "DATA"))
-        len_tag = ".".join((tag, "LEN"))
-        length = self.read_tag(len_tag)
-        values = self.read_array(data_tag, length[0])
-        values = zip(*values)[1]
-        char_array = [chr(ch) for ch in values]
+        data_tag=".".join((tag, "DATA"))
+        len_tag=".".join((tag, "LEN"))
+        length=self.read_tag(len_tag)
+        values=self.read_array(data_tag, length[0])
+        values=zip(*values)[1]
+        char_array=[chr(ch) for ch in values]
         return ''.join(char_array)
 
     def read_array(self, tag, counts, raw=False):
@@ -477,29 +476,29 @@ class Driver(Base):
         self.clear()
         if not self._target_is_connected:
             if not self.forward_open():
-                self._status = (
+                self._status=(
                     7, "Target did not connected. read_tag will not be executed.")
                 logger.warning(self._status)
                 raise DataError(
                     "Target did not connected. read_tag will not be executed.")
 
-        self._byte_offset = 0
-        self._last_position = 0
-        self._output_raw = raw
+        self._byte_offset=0
+        self._last_position=0
+        self._output_raw=raw
 
         if self._output_raw:
-            self._tag_list = ''
+            self._tag_list=''
         else:
-            self._tag_list = []
+            self._tag_list=[]
         while self._byte_offset != -1:
-            rp = create_tag_rp(tag)
+            rp=create_tag_rp(tag)
             if rp is None:
-                self._status = (
+                self._status=(
                     7, "Cannot create tag {0} request packet. read_tag will not be executed.".format(tag))
                 return None
             else:
                 # Creating the Message Request Packet
-                message_request = [
+                message_request=[
                     pack_uint(Base._get_sequence()),
                     # the Request Service
                     chr(TAG_SERVICES_REQUEST["Read Tag Fragmented"]),
@@ -515,7 +514,7 @@ class Driver(Base):
                         DATA_ITEM['Connected'],
                         ''.join(message_request),
                         ADDRESS_ITEM['Connection Based'],
-                        addr_data=self._target_cid,
+                        addr_data = self._target_cid,
                     )) is None:
                 raise DataError("send_unit_data returned not valid data")
 
